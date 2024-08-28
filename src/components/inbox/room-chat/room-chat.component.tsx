@@ -16,7 +16,8 @@ interface Props {
 
 const RoomChat: React.FC<Props> = ({ room, onClose }) => {
   const [messageAtom, setMessageAtom] = useAtom(messageListAtom);
-  const ref = useRef<any>(null);
+  const scrollRef = useRef<any>(null);
+  const inputRef = useRef<any>(null);
 
   const [message, setMessage] = useState<string>("");
   const [isShowAlert, setIsShowAlert] = useState<boolean>(true);
@@ -83,8 +84,17 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
       message,
     };
 
+    // update message in room to read
+    const readedMessage = messageAtom.map((msg) => {
+      if (msg.room_id === room.id) {
+        msg.read = true;
+      }
+
+      return msg;
+    });
+
+    setMessageAtom([...readedMessage, newData]);
     setReplyMsg("");
-    setMessageAtom([...messageAtom, newData]);
   };
 
   const onUpdateMessage = () => {
@@ -120,13 +130,19 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
   };
 
   useEffect(() => {
-    ref.current.scrollIntoView({ behavior: "smooth" });
+    scrollRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messageAtom]);
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsShowAlert(false);
-    }, 2000);
+    // set focus in first load
+    inputRef.current.focus();
+
+    // show alert connectinn when room type user
+    if (room.type === "USER") {
+      setTimeout(() => {
+        setIsShowAlert(false);
+      }, 2000);
+    }
   }, []);
 
   return (
@@ -178,14 +194,17 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
                         setMessage(fltrMsg?.message || "");
                       }
                     }}
-                    onReply={(chatMsg) => setReplyMsg(chatMsg)}
+                    onReply={(chatMsg) => {
+                      setReplyMsg(chatMsg);
+                      inputRef.current.focus();
+                    }}
                   />
                 );
               })}
             </div>
           );
         })}
-        <div ref={ref} />
+        <div ref={scrollRef} />
       </div>
       {isShowAlert && room.type === "USER" && <ConnectingAlert />}
 
@@ -206,11 +225,12 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
             </div>
           )}
           <Input
-            className={classNames({ "rounded-none": replyMsg !== "" })}
+            ref={inputRef}
             value={message}
+            className={classNames({ "rounded-none": replyMsg !== "" })}
             placeholder="Type a new message"
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && message) {
                 if (chatId) {
                   onUpdateMessage();
                 } else {
@@ -225,15 +245,17 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
         </div>
         <Button
           appearance="primary"
-          disabled={!message}
+          disabled={room.type === "USER" && isShowAlert}
           onClick={() => {
-            if (chatId) {
-              onUpdateMessage();
-            } else {
-              onSendMessage();
-            }
+            if (message) {
+              if (chatId) {
+                onUpdateMessage();
+              } else {
+                onSendMessage();
+              }
 
-            setMessage("");
+              setMessage("");
+            }
           }}
         >
           Save
@@ -254,3 +276,5 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
 };
 
 export default RoomChat;
+
+// ADA BUG KETIKA BARU PERTAMA KALI BUKA PESAN TERUS LANGSUNG REPLY MASIH NYANTOL NEW MESSAGENYA
