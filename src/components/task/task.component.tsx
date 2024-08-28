@@ -1,9 +1,13 @@
-import React, { useState } from "react";
-import { Button, Divider, SelectPicker } from "rsuite";
-import ItemCard, { TaskProps } from "./card/card.component";
-import style from "./task.module.less";
+import React, { useEffect, useState } from "react";
+import { Button, Divider, Loader, SelectPicker } from "rsuite";
+import ItemCard, { TaskProps } from "./item/item.component";
+import Loading from "@components/loading/loading.component";
 
 const TaskCard: React.FC = () => {
+  const [activeKey, setActiveKey] = useState<number[]>([]);
+  const [tasks, setTasks] = useState<TaskProps[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const taskMenu = [
     {
       label: "My Task",
@@ -19,26 +23,6 @@ const TaskCard: React.FC = () => {
     },
   ];
 
-  const [activeKey, setActiveKey] = useState<number[]>([]);
-  const [tasks, setTasks] = useState<TaskProps[]>([
-    {
-      id: 1,
-      title: "Ini title 3",
-      isCompleted: false,
-      deadline: new Date().toString(),
-      description:
-        "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
-    },
-    {
-      id: 2,
-      title: "Ini title 2",
-      isCompleted: true,
-      deadline: new Date().toString(),
-      description:
-        "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
-    },
-  ]);
-
   const updateTask = (taskId: number, key: any, value: any) => {
     const updateTask = tasks.map((task: any) => {
       if (task.id === taskId) {
@@ -51,9 +35,27 @@ const TaskCard: React.FC = () => {
     setTasks(updateTask);
   };
 
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/posts")
+      .then((response) => response.json())
+      .then((json) => {
+        const arrs: TaskProps[] = json.map((val: any) => ({
+          id: val.id,
+          title: val.title,
+          description: val.body,
+          deadline: new Date().toString(),
+          isCompleted: false,
+        }));
+
+        setTasks(arrs);
+        setIsLoading(false);
+      });
+  }, []);
+
+  // animate__animated
   return (
-    <div className={style.card}>
-      <div className="flex justify-between items-center mb-[22px]">
+    <div className="card-quick animate__animated animate__bounceInRight">
+      <div className="flex justify-between items-center sticky top-0 bg-white z-1 pt-6 pb-[22px]">
         <SelectPicker
           data={taskMenu}
           defaultValue="my-task"
@@ -63,48 +65,52 @@ const TaskCard: React.FC = () => {
           appearance="primary"
           onClick={() => {
             setTasks((old: TaskProps[]) => [
-              ...old,
               {
-                id: Math.floor(Math.random() * 5),
+                id: new Date().getMilliseconds(),
                 title: "",
                 isCompleted: false,
                 deadline: "",
                 description: "",
               },
+              ...old,
             ]);
           }}
         >
           New Task
         </Button>
       </div>
-      {tasks.reverse().map((task: TaskProps, index: number) => {
-        return (
-          <div key={task.id}>
-            <ItemCard
-              task={task}
-              activeKey={activeKey}
-              onUpdateData={(key, value) => {
-                updateTask(task.id, key, value);
-              }}
-              onDelete={(taskId) => {
-                const newTask = tasks.filter((val) => val.id !== taskId);
+      {isLoading ? (
+        <Loading text="Loading Task ..." />
+      ) : (
+        tasks.map((task: TaskProps, index: number) => {
+          return (
+            <div key={task.id}>
+              <ItemCard
+                task={task}
+                activeKey={activeKey}
+                onUpdateData={(key, value) => {
+                  updateTask(task.id, key, value);
+                }}
+                onDelete={(taskId) => {
+                  const newTask = tasks.filter((val) => val.id !== taskId);
 
-                setTasks(newTask);
-              }}
-              onExpand={() => {
-                setActiveKey((value) => {
-                  if (activeKey.includes(task.id)) {
-                    return value.filter((id) => id !== task.id);
-                  }
+                  setTasks(newTask);
+                }}
+                onExpand={() => {
+                  setActiveKey((value) => {
+                    if (activeKey.includes(task.id)) {
+                      return value.filter((id) => id !== task.id);
+                    }
 
-                  return [...value, task.id];
-                });
-              }}
-            />
-            {tasks.length - 1 !== index && <Divider className="my-[22px]" />}
-          </div>
-        );
-      })}
+                    return [...value, task.id];
+                  });
+                }}
+              />
+              {tasks.length - 1 !== index && <Divider className="my-[22px]" />}
+            </div>
+          );
+        })
+      )}
     </div>
   );
 };

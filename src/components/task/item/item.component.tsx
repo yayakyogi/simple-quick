@@ -1,5 +1,6 @@
+import { time } from "@libraries/time";
 import classNames from "classnames";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Checkbox,
   DatePicker,
@@ -33,7 +34,6 @@ const ItemCard: React.FC<Props> = ({
   onUpdateData,
   onDelete,
 }) => {
-  const ref = useRef<any>(null);
   const [addTitle, setAddTitle] = useState<string>("");
   const [description, setDescription] = useState<string>(task.description);
   const [editDescription, setEditDescription] = useState<boolean>(false);
@@ -101,10 +101,13 @@ const ItemCard: React.FC<Props> = ({
         )}
         {
           <span>
-            {task.deadline ? formatDate(task.deadline) : "Please set date"}
+            {task.deadline
+              ? time(task.deadline).format("DD/MM/YYYY")
+              : "Please set date"}
           </span>
         }
         <IconButton
+          className="btn-icon-custom"
           icon={
             <div
               className={classNames("text-lg", {
@@ -118,18 +121,21 @@ const ItemCard: React.FC<Props> = ({
         <Whisper
           placement="bottomEnd"
           trigger="click"
-          ref={ref}
           speaker={
-            <Popover ref={ref} className="p-0 mt-0">
+            <Popover className="p-0 mt-0">
               <Dropdown.Menu>
-                <Dropdown.Item onClick={() => onDelete(task.id)}>
-                  Delete
+                <Dropdown.Item
+                  onClick={() => onDelete(task.id)}
+                  className="w-20 text-center"
+                >
+                  <span className="text-danger">Delete</span>
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Popover>
           }
         >
           <IconButton
+            className="btn-icon-custom"
             icon={<div className="i-mdi:dots-horizontal text-lg" />}
           />
         </Whisper>
@@ -157,6 +163,7 @@ const ItemCard: React.FC<Props> = ({
           <div className="flex items-start">
             <IconButton
               disabled={task.isCompleted}
+              className="btn-icon-custom"
               icon={
                 <div
                   className={classNames("i-mdi:pencil text-lg text-blue", {

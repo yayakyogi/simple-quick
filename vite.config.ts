@@ -12,6 +12,18 @@ const pathAlias: AliasOptions = [
     find: "@components",
     replacement: path.resolve(__dirname, "src/components"),
   },
+  {
+    find: "@libraries",
+    replacement: path.resolve(__dirname, "src/libraries"),
+  },
+  {
+    find: "@resources",
+    replacement: path.resolve(__dirname, "src/resources"),
+  },
+  {
+    find: "@state",
+    replacement: path.resolve(__dirname, "src/state"),
+  },
 ];
 
 // https://vitejs.dev/config/

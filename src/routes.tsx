@@ -1,4 +1,4 @@
-import Home from "@pages/example-page/home";
+import Home from "@pages";
 import { RouteObject } from "react-router-dom";
 
 export default [
