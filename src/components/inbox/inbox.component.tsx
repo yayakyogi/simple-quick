@@ -1,5 +1,5 @@
 import Loading from "@components/loading/loading.component";
-import { useAtomic } from "@libraries/atom";
+import { useAtom } from "jotai";
 import { IChats, IRoom } from "@resources/interface";
 import { messageListAtom, roomListAtom } from "@state/message.atom";
 import React, { useEffect, useState } from "react";
@@ -11,11 +11,12 @@ import RoomChat from "./room-chat/room-chat.component";
 type RoomList = IRoom & { message: IChats };
 
 const InboxCard: React.FC = () => {
+  const [messageList] = useAtom(messageListAtom);
+  const [roomAtoms] = useAtom(roomListAtom);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [room, setRoom] = useState<IRoom>({ id: "", name: "", type: "USER" });
   const [roomList, setRoomList] = useState<RoomList[]>([]);
-  const [messageList] = useAtomic(messageListAtom);
-  const [roomAtoms] = useAtomic(roomListAtom);
 
   const onCloseRoom = () => {
     // set default to close roome

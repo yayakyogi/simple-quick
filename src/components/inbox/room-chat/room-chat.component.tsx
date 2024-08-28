@@ -6,7 +6,7 @@ import { IChats, IRoom } from "@resources/interface";
 import { groupBy } from "lodash-es";
 import classNames from "classnames";
 import ConnectingAlert from "../connecting-alert/connecting-alert.component";
-import { useAtomic } from "@libraries/atom";
+import { useAtom } from "jotai";
 import { messageListAtom } from "@state/message.atom";
 
 interface Props {
@@ -15,12 +15,13 @@ interface Props {
 }
 
 const RoomChat: React.FC<Props> = ({ room, onClose }) => {
+  const [messageAtom, setMessageAtom] = useAtom(messageListAtom);
   const ref = useRef<any>(null);
+
   const [message, setMessage] = useState<string>("");
   const [isShowAlert, setIsShowAlert] = useState<boolean>(true);
-
-  const [messageAtom, setMessageAtom] = useAtomic(messageListAtom);
   const [chatId, setChatId] = useState<string>("");
+  const [replyMsg, setReplyMsg] = useState<string>("");
 
   const messageList = useMemo(() => {
     const results: { created_at: string; messages: IChats[] }[] = [];
@@ -56,6 +57,7 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
           room_id: rows[i].room_id,
           sender: rows[i].sender,
           created_at: rows[i].created_at,
+          reply: rows[i].reply,
         });
       }
 
@@ -77,9 +79,11 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
         id: "1",
         name: "me",
       },
+      reply: replyMsg,
       message,
     };
 
+    setReplyMsg("");
     setMessageAtom([...messageAtom, newData]);
   };
 
@@ -144,9 +148,9 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
         />
       </div>
       <div className="flex-1 mt-2">
-        {messageList.map((msg, index) => {
+        {messageList.map((msg) => {
           return (
-            <div key={index}>
+            <div key={msg.created_at}>
               <Divider className="my-1">
                 <span
                   className={classNames({
@@ -174,6 +178,7 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
                         setMessage(fltrMsg?.message || "");
                       }
                     }}
+                    onReply={(chatMsg) => setReplyMsg(chatMsg)}
                   />
                 );
               })}
@@ -183,24 +188,41 @@ const RoomChat: React.FC<Props> = ({ room, onClose }) => {
         <div ref={ref} />
       </div>
       {isShowAlert && room.type === "USER" && <ConnectingAlert />}
-      <div className=" flex -mx-7 gap-1 p-3 bg-white sticky bottom-0">
-        <Input
-          className="w-full"
-          value={message}
-          placeholder="Type a new message"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (chatId) {
-                onUpdateMessage();
-              } else {
-                onSendMessage();
-              }
 
-              setMessage("");
-            }
-          }}
-          onChange={(val) => setMessage(val)}
-        />
+      <div className=" flex items-end -mx-7 gap-1 p-3 bg-white sticky bottom-0">
+        <div
+          className={classNames("w-full relative rounded overflow-hidden", {
+            "border-1px border-solid border-black": replyMsg,
+          })}
+        >
+          {replyMsg && (
+            <div className="p-3 bg-gray w-a border-b-1px border-b-solid border-black relative">
+              <span>{replyMsg}</span>
+              <IconButton
+                className="bg-transparent hover:bg-transparent focus:bg-transparent absolute top-0 right-0"
+                icon={<div className="i-mdi:close" />}
+                onClick={() => setReplyMsg("")}
+              />
+            </div>
+          )}
+          <Input
+            className={classNames({ "rounded-none": replyMsg !== "" })}
+            value={message}
+            placeholder="Type a new message"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                if (chatId) {
+                  onUpdateMessage();
+                } else {
+                  onSendMessage();
+                }
+
+                setMessage("");
+              }
+            }}
+            onChange={(val) => setMessage(val)}
+          />
+        </div>
         <Button
           appearance="primary"
           disabled={!message}

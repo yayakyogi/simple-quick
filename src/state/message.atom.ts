@@ -1,7 +1,7 @@
-import { atomic } from "@libraries/atom";
+import { atom } from "jotai";
 import { IChats, IRoom } from "@resources/interface";
 
-export const messageListAtom = atomic<IChats[]>([
+export const messageListAtom = atom<IChats[]>([
   {
     id: "1",
     room_id: "1",
@@ -92,7 +92,7 @@ export const messageListAtom = atomic<IChats[]>([
   },
 ]);
 
-export const roomListAtom = atomic<IRoom[]>([
+export const roomListAtom = atom<IRoom[]>([
   {
     id: "1",
     name: "109220-Naturalization",

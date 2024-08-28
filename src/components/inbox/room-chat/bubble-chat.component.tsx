@@ -5,22 +5,21 @@ import { Divider, Dropdown, IconButton, Popover, Whisper } from "rsuite";
 import { time } from "@libraries/time";
 import { IChats, IRoom } from "@resources/interface";
 
-export interface BubbleProps {
-  id: string;
-  name: string;
-  message: string;
-  created_at: Date;
-  is_me: boolean;
-}
-
 interface Props {
   chat: IChats;
   type: IRoom["type"];
   roomName: IRoom["name"];
   onUpdate: (action: "edit" | "delete", chatId: string) => void;
+  onReply: (message: string) => void;
 }
 
-const BubbleChat: React.FC<Props> = ({ chat, type, roomName, onUpdate }) => {
+const BubbleChat: React.FC<Props> = ({
+  chat,
+  type,
+  roomName,
+  onUpdate,
+  onReply,
+}) => {
   const triggerRef = useRef<any>();
 
   return (
@@ -39,6 +38,11 @@ const BubbleChat: React.FC<Props> = ({ chat, type, roomName, onUpdate }) => {
             ? chat.sender.name
             : roomName}
       </span>
+      {chat.reply && (
+        <div className="ml-a min-w-40 bg-gray p-2 rounded border-1 border-solid border-slate-3 mb-1">
+          {chat.reply}
+        </div>
+      )}
       <div
         className={classNames("w-full flex items-center gap-1", {
           [style.reverse]: chat.sender.name === "me",
@@ -50,56 +54,63 @@ const BubbleChat: React.FC<Props> = ({ chat, type, roomName, onUpdate }) => {
             {
               [style.bubbleOrange]: chat.sender.name !== "me",
               [style.bubblePurple]: chat.sender.name === "me",
-              [style.bubbleDefault]:
-                chat.sender.name !== "me" && type === "USER",
+              [style.bubbleDefault]: chat.sender.name !== "me" && type === "USER",
             }
           )}
         >
           <span>{chat.message}</span>
-          <span className="text-xs">
-            {time(chat.created_at).format("HH:mm")}
-          </span>
+          <span className="text-xs">{time(chat.created_at).format("HH:mm")}</span>
         </div>
-        <Whisper
-          ref={triggerRef}
-          trigger="click"
-          placement="bottomEnd"
-          speaker={
-            <Popover className="p-0">
-              {chat.sender.name === "me" ? (
-                <Dropdown.Menu className="w-20">
-                  <Dropdown.Item
-                    onClick={() => {
-                      onUpdate("edit", chat.id);
-                      triggerRef.current.close();
-                    }}
-                  >
-                    <span className="text-blue">Edit</span>
-                  </Dropdown.Item>
-                  <Divider className="my-0" />
-                  <Dropdown.Item
-                    onClick={() => {
-                      onUpdate("delete", chat.id);
-                      triggerRef.current.close();
-                    }}
-                  >
-                    <span className="text-danger">Delete</span>
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              ) : (
-                <Dropdown.Menu className="w-20">
-                  <Dropdown.Item>Share</Dropdown.Item>
-                  <Dropdown.Item>Reply</Dropdown.Item>
-                </Dropdown.Menu>
-              )}
-            </Popover>
-          }
-        >
-          <IconButton
-            className="btn-icon-custom"
-            icon={<div className="i-mdi:dots-horizontal text-lg" />}
-          />
-        </Whisper>
+        {(type === "GROUP" ||
+          (type === "USER" && chat.sender.name === "me")) && (
+          <Whisper
+            ref={triggerRef}
+            trigger="click"
+            placement="bottomEnd"
+            speaker={
+              <Popover className="p-0">
+                {chat.sender.name === "me" ? (
+                  <Dropdown.Menu className="w-20">
+                    <Dropdown.Item
+                      onClick={() => {
+                        onUpdate("edit", chat.id);
+                        triggerRef.current.close();
+                      }}
+                    >
+                      <span className="text-blue">Edit</span>
+                    </Dropdown.Item>
+                    <Divider className="my-0" />
+                    <Dropdown.Item
+                      onClick={() => {
+                        onUpdate("delete", chat.id);
+                        triggerRef.current.close();
+                      }}
+                    >
+                      <span className="text-danger">Delete</span>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                ) : (
+                  <Dropdown.Menu className="w-20">
+                    <Dropdown.Item disabled>Share</Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        onReply(chat.message);
+                        triggerRef.current.close();
+                      }}
+                    >
+                      Reply
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                )}
+              </Popover>
+            }
+          >
+            <IconButton
+              className="btn-icon-custom"
+              icon={<div className="i-mdi:dots-horizontal text-lg" />}
+            />
+          </Whisper>
+        )}
       </div>
     </div>
   );

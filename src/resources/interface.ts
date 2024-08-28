@@ -16,4 +16,5 @@ export interface IChats {
   created_at: string;
   read: boolean;
   sender: User;
+  reply?: string;
 }
