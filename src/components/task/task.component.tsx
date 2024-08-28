@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Divider, Loader, SelectPicker } from "rsuite";
+import { Button, Divider, SelectPicker } from "rsuite";
 import ItemCard, { TaskProps } from "./item/item.component";
 import Loading from "@components/loading/loading.component";
 
@@ -45,6 +45,7 @@ const TaskCard: React.FC = () => {
           description: val.body,
           deadline: new Date().toString(),
           isCompleted: false,
+          type: [],
         }));
 
         setTasks(arrs);
@@ -52,7 +53,6 @@ const TaskCard: React.FC = () => {
       });
   }, []);
 
-  // animate__animated
   return (
     <div className="card-quick animate__animated animate__bounceInRight">
       <div className="flex justify-between items-center sticky top-0 bg-white z-1 pt-6 pb-[22px]">
@@ -71,6 +71,7 @@ const TaskCard: React.FC = () => {
                 isCompleted: false,
                 deadline: "",
                 description: "",
+                type: [],
               },
               ...old,
             ]);
