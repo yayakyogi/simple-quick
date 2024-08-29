@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Divider, SelectPicker } from "rsuite";
-import ItemCard, { TaskProps } from "./item/item.component";
+import ItemCard, { ITask } from "./item/item.component";
 import Loading from "@components/loading/loading.component";
 
 const TaskCard: React.FC = () => {
   const [activeKey, setActiveKey] = useState<number[]>([]);
-  const [tasks, setTasks] = useState<TaskProps[]>([]);
+  const [tasks, setTasks] = useState<ITask[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const taskMenu = [
@@ -39,7 +39,7 @@ const TaskCard: React.FC = () => {
     fetch("https://jsonplaceholder.typicode.com/posts")
       .then((response) => response.json())
       .then((json) => {
-        const arrs: TaskProps[] = json.map((val: any) => ({
+        const arrs: ITask[] = json.map((val: any) => ({
           id: val.id,
           title: val.title,
           description: val.body,
@@ -64,7 +64,7 @@ const TaskCard: React.FC = () => {
         <Button
           appearance="primary"
           onClick={() => {
-            setTasks((old: TaskProps[]) => [
+            setTasks((old: ITask[]) => [
               {
                 id: new Date().getMilliseconds(),
                 title: "",
@@ -83,7 +83,7 @@ const TaskCard: React.FC = () => {
       {isLoading ? (
         <Loading text="Loading Task ..." />
       ) : (
-        tasks.map((task: TaskProps, index: number) => {
+        tasks.map((task: ITask, index: number) => {
           return (
             <div key={task.id}>
               <ItemCard
