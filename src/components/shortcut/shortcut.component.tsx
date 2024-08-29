@@ -24,7 +24,7 @@ const ShortCut: React.FC<Props> = ({
       {/* Button quick */}
       <div
         className={classNames(
-          "flex gap-3 absolute bottom-[36px] right-[34px] animate__animated",
+          "flex items-end gap-3 absolute bottom-[36px] right-[34px] animate__animated",
           { ["animate__backOutRight"]: activeContent !== "" }
         )}
       >
@@ -35,22 +35,28 @@ const ShortCut: React.FC<Props> = ({
             { ["animate__backOutRight"]: !expand }
           )}
         >
-          <IconButton
-            size="lg"
-            className="shadow-lg w-16 h-16 rounded-full btn-icon-custom"
-            onClick={() => onChangeContent("task")}
-            icon={
-              <div className="i-mdi:book-open-outline text-amber text-3xl" />
-            }
-          />
-          <IconButton
-            size="lg"
-            className="shadow-lg w-16 h-16 rounded-full btn-icon-custom"
-            onClick={() => onChangeContent("inbox")}
-            icon={
-              <div className="i-mdi:message-reply-text-outline text-purple text-3xl" />
-            }
-          />
+          <div className="flex flex-col gap-2 items-center">
+            <span className="font-600">Task</span>
+            <IconButton
+              size="lg"
+              className="shadow-lg w-16 h-16 rounded-full btn-icon-custom"
+              onClick={() => onChangeContent("task")}
+              icon={
+                <div className="i-mdi:book-open-outline text-amber text-3xl" />
+              }
+            />
+          </div>
+          <div className="flex flex-col gap-2 items-center">
+            <span className="font-600">Inbox</span>
+            <IconButton
+              size="lg"
+              className="shadow-lg w-16 h-16 rounded-full btn-icon-custom"
+              onClick={() => onChangeContent("inbox")}
+              icon={
+                <div className="i-mdi:message-reply-text-outline text-purple text-3xl" />
+              }
+            />
+          </div>
         </div>
         <IconButton
           size="lg"
